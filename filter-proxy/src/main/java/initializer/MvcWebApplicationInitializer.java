@@ -1,14 +1,17 @@
 package initializer;
 
+import config.AppConfig;
 import config.WebConfig;
+import jakarta.servlet.Filter;
 import org.springframework.lang.NonNull;
+import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class MvcWebApplicationInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return null;
+        return new Class[]{AppConfig.class};
     }
 
     @Override
@@ -19,6 +22,11 @@ public class MvcWebApplicationInitializer extends AbstractAnnotationConfigDispat
     @NonNull
     @Override
     protected String[] getServletMappings() {
-        return new String[] {"/"};
+        return new String[]{"/"};
+    }
+
+    @Override
+    protected Filter[] getServletFilters() {
+        return new Filter[]{new DelegatingFilterProxy("realFilter")};
     }
 }
