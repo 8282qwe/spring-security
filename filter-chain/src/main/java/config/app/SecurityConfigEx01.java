@@ -1,4 +1,4 @@
-package config.web;
+package config.app;
 
 import filter.SecurityFilterEx01;
 import filter.SecurityFilterEx02;
@@ -19,7 +19,7 @@ import java.util.List;
 public class SecurityConfigEx01 {
 
     @Bean
-    public FilterChainProxy securityFilterChainProxy() {
+    public FilterChainProxy springSecurityFilterChain() {
         List<SecurityFilterChain> securityFilterChains = Arrays.asList(
                 new SecurityFilterChain() {
                     @Override

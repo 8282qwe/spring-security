@@ -1,6 +1,5 @@
-package config.web;
+package config.app;
 
-import config.WebConfig;
 import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes={WebConfig.class, SecurityConfigEx02.class})
+@ContextConfiguration(locations={"classpath:config/WebConfig.xml", "classpath:config/app/SecurityConfigEx01.xml"})
 @WebAppConfiguration
-public class SecurityConfigEx02Test {
+public class SecurityConfigEx01Test {
     private MockMvc mvc;
     private FilterChainProxy filterChainProxy;
 
@@ -37,5 +36,45 @@ public class SecurityConfigEx02Test {
                 .webAppContextSetup(context)
                 .addFilter(new DelegatingFilterProxy(filterChainProxy), "/*")
                 .build();
+    }
+
+    @Test
+    public void testSecurityFilterChains(){
+        List<SecurityFilterChain> securityFilterChains = filterChainProxy.getFilterChains();
+        assertEquals(2, securityFilterChains.size());
+    }
+
+    @Test
+    public void testSecurityFilterChain01() {
+        SecurityFilterChain securityFilterChain = filterChainProxy.getFilterChains().getFirst();
+        assertEquals(0, securityFilterChain.getFilters().size());
+    }
+
+    @Test
+    public void testSecurityFilterChain02() {
+        SecurityFilterChain securityFilterChain = filterChainProxy.getFilterChains().getLast();
+        List<Filter> filters = securityFilterChain.getFilters();
+        for (Filter filter : filters) {
+            System.out.println(filter.getClass());
+        }
+        assertEquals(16, filters.size());
+    }
+
+    @Test
+    public void testAssets() throws Exception {
+        mvc
+                .perform(get("/assets/images/logo.svg"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/svg+xml"))
+                .andDo(print());
+    }
+
+    @Test
+    public void testPing() throws Exception {
+        mvc
+                .perform(get("/hello"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("world"))
+                .andDo(print());
     }
 }

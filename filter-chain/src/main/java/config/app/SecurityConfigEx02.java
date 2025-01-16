@@ -1,4 +1,4 @@
-package config.web;
+package config.app;
 
 import filter.SecurityFilterEx01;
 import filter.SecurityFilterEx02;
@@ -18,10 +18,10 @@ import java.util.List;
 public class SecurityConfigEx02 {
 
     @Bean
-    public FilterChainProxy securityFilterChainProxy() {
+    public FilterChainProxy springSecurityFilterChain() {
         List<SecurityFilterChain> securityFilterChains = Arrays.asList(
-                new DefaultSecurityFilterChain(new AntPathRequestMatcher("/hello/**"), List.of(securityFilterEx01(), securityFilterEx02())),
-                new DefaultSecurityFilterChain(new AntPathRequestMatcher("/ping/**"), List.of(securityFilterEx03(), securityFilterEx04()))
+                new DefaultSecurityFilterChain(new AntPathRequestMatcher("/hello/**"), securityFilterEx01(), securityFilterEx02()),
+                new DefaultSecurityFilterChain(new AntPathRequestMatcher("/ping/**"), securityFilterEx03(), securityFilterEx04())
         );
         return new FilterChainProxy(securityFilterChains);
     }

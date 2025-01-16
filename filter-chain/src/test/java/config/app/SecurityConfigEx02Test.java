@@ -1,7 +1,6 @@
-package config.web;
+package config.app;
 
 import config.WebConfig;
-import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -35,6 +35,46 @@ public class SecurityConfigEx02Test {
                 .webAppContextSetup(applicationContext)
                 .addFilter(new DelegatingFilterProxy(filterChainProxy), "/*")
                 .build();
+    }
+
+    @Test
+    public void testSecurityFilterChains(){
+        List<SecurityFilterChain> securityFilterChains = filterChainProxy.getFilterChains();
+        assertEquals(2, securityFilterChains.size());
+    }
+
+    @Test
+    public void testSecurityFilterChain01() {
+        SecurityFilterChain securityFilterChain = filterChainProxy.getFilterChains().getFirst();
+        assertEquals(2, securityFilterChain.getFilters().size());
+    }
+
+    @Test
+    public void testSecurityFilterChain02() {
+        SecurityFilterChain securityFilterChain = filterChainProxy.getFilterChains().getLast();
+        assertEquals(2, securityFilterChain.getFilters().size());
+    }
+
+    @Test
+    public void testHello() throws Exception {
+        mvc
+                .perform(get("/hello"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("world"))
+                .andExpect(cookie().value("SecurityFilterEx01", "Works"))
+                .andExpect(cookie().value("SecurityFilterEx02", "Works"))
+                .andDo(print());
+    }
+
+    @Test
+    public void testPing() throws Exception {
+        mvc
+                .perform(get("/ping"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("pong"))
+                .andExpect(cookie().value("SecurityFilterEx03", "Works"))
+                .andExpect(cookie().value("SecurityFilterEx04", "Works"))
+                .andDo(print());
     }
 }
 

@@ -1,4 +1,4 @@
-package config.web;
+package config.app;
 
 import config.WebConfig;
 import jakarta.servlet.Filter;
@@ -7,11 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.channel.ChannelProcessingFilter;
-import org.springframework.security.web.authentication.ui.DefaultResourcesFilter;
-import org.springframework.security.web.jaasapi.JaasApiIntegrationFilter;
-import org.springframework.security.web.session.ConcurrentSessionFilter;
-import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -29,19 +24,55 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes={WebConfig.class, SecurityConfigEx01.class})
+@ContextConfiguration(classes={WebConfig.class, SecurityConfigEx02.class})
 @WebAppConfiguration
-public class SecurityConfigEx01Test {
+public class SecurityConfigEx02Test {
     private MockMvc mvc;
     private FilterChainProxy filterChainProxy;
 
     @BeforeEach
     public void setup(WebApplicationContext context) {
-        filterChainProxy = (FilterChainProxy) context.getBean("springSecurityFilterChain", Filter.class);
+        filterChainProxy = (FilterChainProxy)context.getBean("springSecurityFilterChain", Filter.class);
         mvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .addFilter(new DelegatingFilterProxy(filterChainProxy), "/*")
                 .build();
     }
-}
 
+    @Test
+    public void testSecurityFilterChains() {
+        List<SecurityFilterChain> securityFilterChains = filterChainProxy.getFilterChains();
+        assertEquals(2, securityFilterChains.size());
+    }
+
+    @Test
+    public void testSecurityFilters() {
+        SecurityFilterChain securityFilterChain = filterChainProxy.getFilterChains().getLast();
+        List<Filter> filters = securityFilterChain.getFilters();
+
+        assertEquals(15, filters.size());
+        assertEquals("BasicAuthenticationFilter", filters.get(10).getClass().getSimpleName());
+
+        for(Filter filter : filters) {
+            System.out.println(filter.getClass().getSimpleName());
+        }
+    }
+
+    @Test
+    public void testHello() throws Throwable {
+        mvc
+                .perform(get("/hello"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("world"))
+                .andDo(print());
+    }
+
+    @Test
+    public void testPing() throws Throwable {
+        mvc
+                .perform(get("/ping"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("pong"))
+                .andDo(print());
+    }
+}

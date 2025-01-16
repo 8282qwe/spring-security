@@ -1,7 +1,6 @@
-package config.web;
+package config.app;
 
 import config.WebConfig;
-import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,14 +28,51 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SecurityConfigEx03Test {
     private MockMvc mvc;
     private FilterChainProxy filterChainProxy;
+//    @Autowired
+//    private HttpServletResponse httpServletResponse;
 
     @BeforeEach
-    public void setup(WebApplicationContext context) {
-        filterChainProxy = (FilterChainProxy)context.getBean("springSecurityFilterChain", Filter.class);
+    public void setup(WebApplicationContext applicationContext) {
+        filterChainProxy = applicationContext.getBean("springSecurityFilterChain", FilterChainProxy.class);
         mvc = MockMvcBuilders
-                .webAppContextSetup(context)
+                .webAppContextSetup(applicationContext)
                 .addFilter(new DelegatingFilterProxy(filterChainProxy), "/*")
                 .build();
     }
 
+    @Test
+    public void testSecurityFilterChains(){
+        List<SecurityFilterChain> securityFilterChains = filterChainProxy.getFilterChains();
+        assertEquals(2, securityFilterChains.size());
+    }
+
+    @Test
+    public void testSecurityFilterChain01() {
+        SecurityFilterChain securityFilterChain = filterChainProxy.getFilterChains().getFirst();
+        assertEquals(0, securityFilterChain.getFilters().size());
+    }
+
+    @Test
+    public void testSecurityFilterChain02() {
+        SecurityFilterChain securityFilterChain = filterChainProxy.getFilterChains().getLast();
+        assertEquals(3, securityFilterChain.getFilters().size());
+    }
+
+    @Test
+    public void testAssets() throws Exception {
+        mvc
+                .perform(get("/assets/images/logo.svg"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/svg+xml"))
+                .andDo(print());
+    }
+
+    @Test
+    public void testPing() throws Exception {
+        mvc
+                .perform(get("/hello"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("world"))
+                .andDo(print());
+    }
 }

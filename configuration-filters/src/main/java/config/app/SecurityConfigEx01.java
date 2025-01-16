@@ -1,4 +1,4 @@
-package config.web;
+package config.app;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,14 +18,24 @@ public class SecurityConfigEx01 {
             @Override
             public void customize(WebSecurity web) {
                 web
-                    .ignoring()
-                    .requestMatchers(new AntPathRequestMatcher("/assets/**"));
+                        .ignoring()
+                        .requestMatchers(new AntPathRequestMatcher("/assets/**"));
             }
         };
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.formLogin(new Customizer<FormLoginConfigurer<HttpSecurity>>() {
+//            @Override
+//            public void customize(FormLoginConfigurer<HttpSecurity> formLoginConfigurer) {
+//
+//            }
+//        });
+
+        http
+                .formLogin((formLogin -> {
+                }));
         return http.build();
     }
 }
